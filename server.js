@@ -6,11 +6,14 @@ import userRoutes from "./routes/userRoutes.js";
 
 dotenv.config();
 
+// connect db
 connectDB();
+
 const app = express();
 
 const PORT = process.env.PORT || 5000;
 
+// middlewares
 app.use(express.json()); //to parse JSON data in the req.body
 app.use(express.urlencoded({ extended: true })); //To parse from data in the req.body
 app.use(cookieParser());
