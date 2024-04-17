@@ -11,11 +11,11 @@ const getUserProfile = async (req, res) => {
       .select("-password")
       .select("-updatedAt");
 
-    if (!user) return res.status(400).json({ message: "User not found" });
+    if (!user) return res.status(400).json({ error: "User not found" });
 
     res.status(200).json(user);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ error: error.message });
     console.log("Error in GetUser Profile", error.message);
   }
 };
@@ -27,7 +27,7 @@ const signupUser = async (req, res) => {
     const user = await User.findOne({ $or: [{ email }, { username }] });
 
     if (user) {
-      return res.status(400).json({ message: "User already exists" });
+      return res.status(400).json({ error: "User already exists" });
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -52,10 +52,10 @@ const signupUser = async (req, res) => {
         username: newUser.username,
       });
     } else {
-      res.status(400).json({ message: "Invalid user data" });
+      res.status(400).json({ error: "Invalid user data" });
     }
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ error: error.message });
     console.log("Error in Signup User", error.message);
   }
 };
@@ -71,7 +71,7 @@ const loginUser = async (req, res) => {
     );
 
     if (!user || !isPasswordCorrect)
-      return res.status(400).json({ message: "Invalid username or password" });
+      return res.status(400).json({ error: "Invalid username or password" });
 
     generateTokenAndSetCookie(user._id, res);
 
@@ -82,7 +82,7 @@ const loginUser = async (req, res) => {
       username: user.username,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ error: error.message });
     console.log("Error in login User", error.message);
   }
 };
@@ -93,7 +93,7 @@ const logoutUser = async (req, res) => {
     res.cookie("jwt", "", { maxAge: 1 });
     res.status(200).json({ message: "User Logged Out successfully" });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ error: error.message });
     console.log("Error in logout User", error.message);
   }
 };
@@ -139,12 +139,12 @@ const updateUser = async (req, res) => {
   try {
     let user = await User.findById(userId);
 
-    if (!user) return res.status(400).json({ message: "User not found" });
+    if (!user) return res.status(400).json({ error: "User not found" });
 
     if (req.params.id !== userId.toString())
       return res
         .status(400)
-        .json({ message: "You cannot update other user's profile" });
+        .json({ error: "You cannot update other user's profile" });
 
     if (password) {
       const salt = await bcrypt.genSalt(10);
