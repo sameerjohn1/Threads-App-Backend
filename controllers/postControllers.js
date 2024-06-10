@@ -11,15 +11,16 @@ const createPost = async (req, res) => {
     if (!postedBy || !text) {
       return res
         .status(400)
-        .json({ error: "PostedBy and text fields are required" });
+        .json({ error: "Postedby and text fields are required" });
     }
 
     const user = await User.findById(postedBy);
-
-    if (!user) return res.status(404).json({ error: "User not found" });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
 
     if (user._id.toString() !== req.user._id.toString()) {
-      return res.status(401).json({ error: "UnAuthorized to create post" });
+      return res.status(401).json({ error: "Unauthorized to create post" });
     }
 
     const maxLength = 500;
@@ -38,13 +39,12 @@ const createPost = async (req, res) => {
     await newPost.save();
 
     res.status(201).json(newPost);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-    console.log(error);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+    console.log(err);
   }
 };
 
-// get post
 const getPost = async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
@@ -54,12 +54,11 @@ const getPost = async (req, res) => {
     }
 
     res.status(200).json(post);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };
 
-// delete post
 const deletePost = async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
@@ -78,13 +77,12 @@ const deletePost = async (req, res) => {
 
     await Post.findByIdAndDelete(req.params.id);
 
-    return res.status(200).json({ message: "Post deleted successfully" });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(200).json({ message: "Post deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };
 
-//  like / unlike post
 const likeUnlikePost = async (req, res) => {
   try {
     const { id: postId } = req.params;
@@ -99,21 +97,20 @@ const likeUnlikePost = async (req, res) => {
     const userLikedPost = post.likes.includes(userId);
 
     if (userLikedPost) {
-      // unlike post
+      // Unlike post
       await Post.updateOne({ _id: postId }, { $pull: { likes: userId } });
       res.status(200).json({ message: "Post unliked successfully" });
     } else {
-      // like post
+      // Like post
       post.likes.push(userId);
       await post.save();
       res.status(200).json({ message: "Post liked successfully" });
     }
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };
 
-// reply to post
 const replyToPost = async (req, res) => {
   try {
     const { text } = req.body;
@@ -128,7 +125,7 @@ const replyToPost = async (req, res) => {
 
     const post = await Post.findById(postId);
     if (!post) {
-      return res.status(400).json({ error: "Post not found" });
+      return res.status(404).json({ error: "Post not found" });
     }
 
     const reply = { userId, text, userProfilePic, username };
@@ -137,12 +134,11 @@ const replyToPost = async (req, res) => {
     await post.save();
 
     res.status(200).json(reply);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };
 
-// get feed posts
 const getFeedPosts = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -177,7 +173,7 @@ const getUserPosts = async (req, res) => {
 
     res.status(200).json(posts);
   } catch (error) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
